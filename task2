@@ -1,0 +1,42 @@
+import pandas as pd
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from datetime import datetime
+
+# Step 1: Read the data from CSV
+data = pd.read_csv("data.csv")
+
+# Step 2: Analyze the data
+average_score = data['Score'].mean()
+highest_score = data['Score'].max()
+lowest_score = data['Score'].min()
+top_scorer = data.loc[data['Score'].idxmax(), 'Name']
+bottom_scorer = data.loc[data['Score'].idxmin(), 'Name']
+
+# Step 3: Generate PDF Report
+def generate_pdf_report(filename="report.pdf"):
+    c = canvas.Canvas(filename, pagesize=letter)
+    width, height = letter
+
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(200, height - 50, "Automated Performance Report")
+
+    c.setFont("Helvetica", 12)
+    c.drawString(50, height - 100, f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+    c.drawString(50, height - 140, "Summary Statistics:")
+    c.drawString(70, height - 160, f"Average Score: {average_score:.2f}")
+    c.drawString(70, height - 180, f"Highest Score: {highest_score} (by {top_scorer})")
+    c.drawString(70, height - 200, f"Lowest Score: {lowest_score} (by {bottom_scorer})")
+
+    c.drawString(50, height - 240, "Detailed Scores:")
+    y = height - 260
+    for index, row in data.iterrows():
+        c.drawString(70, y, f"{row['Name']}: {row['Score']}")
+        y -= 20
+
+    c.save()
+    print(f"Report successfully saved as {filename}")
+
+# Run the report generator
+generate_pdf_report()
